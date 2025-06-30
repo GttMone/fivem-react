@@ -11,11 +11,9 @@ export function useNUIContext() {
 
 export function NUIProvider({ children }: { children: ReactNode }) {
     const [visible, setVisible] = useState(false);
-    const [publicMenuVisible, setPublicMenuVisible] = useState(false);
 
     useOnNUIs({
-        setVisible: (data) => setVisible(prev => typeof data === 'boolean' ? data : !prev),
-        setPublicMenuVisible: (data) => setPublicMenuVisible(prev => typeof data === 'boolean' ? data : !prev),
+        setVisible: (data) => setVisible(data.visible),
     });
 
     return (
