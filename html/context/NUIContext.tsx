@@ -1,7 +1,8 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { useOnNUIs } from "@/hooks/useNUI";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import type { NUIContext } from "@/types/nui";
+import { useOnNUIs } from "@/hooks/useNUI";
+import { nui } from "@/lib/nui";
 
 const NUIContext = createContext<NUIContext>({} as NUIContext);
 
@@ -10,15 +11,29 @@ export function useNUIContext() {
 }
 
 export function NUIProvider({ children }: { children: ReactNode }) {
-    const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(import.meta.env.DEV);
 
     useOnNUIs({
-        setVisible: (data) => setVisible(data.visible),
+        open: ({ self }) => setVisible(true),
+        close: () => setVisible(false),
     });
 
+    useEffect(() => {
+        window.addEventListener('keyup', handleKeybind);
+
+        return () => window.removeEventListener('keypress', handleKeybind);
+    }, []);
+
     return (
-        <NUIContext.Provider value={{ visible, publicMenuVisible }}>
-            { children }
+        <NUIContext.Provider value={{ visible }}>
+            {children}
         </NUIContext.Provider>
     )
+
+    function handleKeybind(ev: KeyboardEvent) {
+        if (ev.key === 'Escape') {
+            setVisible(false);
+            nui.post('close');
+        }
+    }
 }
